@@ -1,8 +1,5 @@
-#paths to compile files
-vpath %.cpp ../src
-
 #include header files
-CXXFLAGS = -I ../src -I ../include -I /usr/include/python2.7 -fno-strict-aliasing -g -O2 -DNDEBUG -g -fwrapv -O2 -Wall -Wno-write-strings
+CXXFLAGS = -I ../include -I /usr/include/python2.7 -fno-strict-aliasing -g -O2 -DNDEBUG -g -fwrapv -O2 -Wall -Wno-write-strings
 CFLAGS = $(CXXFLAGS) 
 
 #external libraries
@@ -22,7 +19,7 @@ all: spammodule
 $(MAIN_NAME): spammodule
 
 spammodule:
-	$(CXX) $(CXXFLAGS) -c ../src/spammodule.c
+	$(CXX) $(CXXFLAGS) -c ../src/spammodule.cpp
 
 #objects removing
 .PHONY: clean

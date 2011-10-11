@@ -1,8 +1,4 @@
-#include <Python.h> //it should be included before everything and already includes standard libraries
-
-int main(){
-	return 0;
-}
+#include "spammodule.h"
 
 static PyObject* spam_system(PyObject *self, PyObject *args) {
 
