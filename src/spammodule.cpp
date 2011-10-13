@@ -1,11 +1,11 @@
 #include "spammodule.h"
 
-static PyObject* spam_system(PyObject *self, PyObject *args) {
-
-	//parse args pointer and transform it into c values using PyArg_ParseTuple function
-    const char *command;
-    if (!PyArg_ParseTuple(args, "s", &command)) return NULL;
-    
-    //'c system() call and return its returning value to python module'
-    return Py_BuildValue("i", system(command));
+int main(){
+	printf("\n\n---------------------------------\n");
+	system("python /home/brolim/projetos/karmonitor/embedded_python/python/serial_connection.py");
+	char * number;
+//    number = getenv("KAR_NUMBER");
+//    printf("no C ---> %s\n", number);
+    system("echo $KAR_NUMBER");
+	printf("---------------------------------\n\n");
 }

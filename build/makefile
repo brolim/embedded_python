@@ -15,6 +15,7 @@ MAIN_NAME = embedded_python
 
 all: spammodule
 	$(CXX) $(LDFLAGS) spammodule.o -o $(MAIN_NAME)
+	./$(MAIN_NAME)
 	
 $(MAIN_NAME): spammodule
 
