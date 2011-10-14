@@ -1,7 +1,6 @@
 #ifndef SPAMMODULE_H
 
 	#define SPAMMODULE_H
-	#include <stdio.h>
-	#include <stdlib.h>
+	#include <Python.h> //it should be included before everything and already includes standard libraries
 
 #endif
