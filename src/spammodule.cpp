@@ -6,19 +6,22 @@ int main(){
     //initialize python interpreter
     Py_Initialize();
     
+    //python path. If you are using linux, you can find this inside the python interpreter using this command:
+    // >>> import sys
+    // >>> ':'.join(sys.path)[1:]
+    char *python_path = "/usr/lib/python2.7:/usr/lib/python2.7/plat-linux2:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/lib-old:/usr/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages/PIL:/usr/lib/pymodules/python2.7/gtk-2.0:/usr/lib/python2.7/dist-packages/gst-0.10:/usr/lib/python2.7/dist-packages/gtk-2.0:/usr/lib/pymodules/python2.7:/usr/lib/pymodules/python2.7/ubuntuone-client:/usr/lib/pymodules/python2.7/ubuntuone-control-panel:/usr/lib/pymodules/python2.7/ubuntuone-storage-protocol";
+    
     //setting our module's path to the python path
-    char *path, *newpath;
-    char *add_to_path = ":/home/brolim/projetos/karmonitor/embedded_python/py_serial_connection";
-    path = Py_GetPath();
-    newpath = (char*)calloc(strlen(path)+strlen(add_to_path)+ 2, 1); 
-    strcpy(newpath, path); 
-    strcat(newpath, add_to_path);
-    PySys_SetPath(newpath); 
+    char *module_path = ":../py_serial_connection";
+    char *new_path = (char*)calloc(strlen(module_path)+strlen(python_path)+ 2, 1); 
+    strcpy(new_path, python_path); 
+    strcat(new_path, module_path);
+    PySys_SetPath(new_path); 
 
     //convert C string to Python string
     PyObject *python_string = PyString_FromString("serial_connection");
     
-    //import module 
+    //importing our module 
     PyObject *python_module = PyImport_Import(python_string);
     
     //frees python_string on python interpreter
@@ -82,7 +85,7 @@ int main(){
     }
     
     //print python value
-    printf("Result of call: %ld\n", PyInt_AsLong(python_returning_value));
+    printf("Result of call: %s\n", PyString_AsString(python_returning_value));
     
     //frees python variables on python interpreter
     Py_DECREF(python_returning_value);

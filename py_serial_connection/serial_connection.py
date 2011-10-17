@@ -1,4 +1,4 @@
-#import serial
+import serial
 
 def string_to_integer(chr_bytes):
     
@@ -24,4 +24,5 @@ def read_4_bytes():
     return string_to_integer(bytes)
 
 def add(a,b):
-    return (a+b+1)
+    return "%d + %d = %d"%(a,b,(a+b))
+
