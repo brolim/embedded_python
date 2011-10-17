@@ -14,7 +14,7 @@ CXX = g++
 MAIN_NAME = embedded_python
 
 all: spammodule
-	$(CXX) $(LDFLAGS) spammodule.o -o $(MAIN_NAME)
+	$(CXX) $(LXXFLAGS) spammodule.o -o $(MAIN_NAME)
 	./$(MAIN_NAME)
 	
 $(MAIN_NAME): spammodule
@@ -25,4 +25,4 @@ spammodule:
 #objects removing
 .PHONY: clean
 clean:
-	rm -fv *.o $(MAIN_NAME)
+	rm -fv *.o $(MAIN_NAME) *.py
