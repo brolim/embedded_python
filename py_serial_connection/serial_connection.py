@@ -22,7 +22,17 @@ def read_4_bytes():
     serial_conn.close()
 
     return string_to_integer(bytes)
+    
+def send_4_bytes(integer):
+    serial_conn = serial.Serial('/dev/ttyUSB0', 115200)
+
+    bytes = []
+    for i in xrange(4):
+        bytes.append(serial_conn.read())
+
+    serial_conn.close()
+
+    return string_to_integer(bytes)
 
 def add(a,b):
-    return "%d + %d = %d"%(a,b,(a+b))
-
+    return "from python: %x"%read_4_bytes()

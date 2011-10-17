@@ -1,8 +1,6 @@
 #include "spammodule.h"
 
-int main(){
-    printf("running... \n\n\n");
-    
+bool Serial::load_python_interpreter(){
     //initialize python interpreter
     Py_Initialize();
     
@@ -18,34 +16,44 @@ int main(){
     strcat(new_path, module_path);
     PySys_SetPath(new_path); 
 
+    return true;
+}
+
+bool Serial::import_python_module(){
     //convert C string to Python string
     PyObject *python_string = PyString_FromString("serial_connection");
     
     //importing our module 
-    PyObject *python_module = PyImport_Import(python_string);
+    this->py_module_serial = PyImport_Import(python_string);
     
     //frees python_string on python interpreter
     Py_DECREF(python_string);
 
     //module import validation
-    if(python_module == NULL){
+    if(this->py_module_serial == NULL){
         PyErr_Print();
         fprintf(stderr, "Failed to load module...\n");
-        return 1;
+        return false;
     }
+    
+    return true;
+}
+
+bool Serial::load_py_function_receive(){
 
     //get reference to the python function
-    PyObject *python_function = PyObject_GetAttrString(python_module, "add");
+    this->py_function_receive = PyObject_GetAttrString(this->py_module_serial, "add");
     
     //function reference validation
-    if(!python_function || !PyCallable_Check(python_function)){
+    if(!this->py_function_receive || !PyCallable_Check(py_function_receive)){
         if (PyErr_Occurred())
             PyErr_Print();
         fprintf(stderr, "Cannot find function 'add' in python module\n");
+        return false;
     }
     
     //set number of arguments of our function
-    PyObject *python_function_arguments = PyTuple_New(2);
+    this->py_function_receive_args = PyTuple_New(2);
     
     //c arguments will be converted to python arguments with this loop
     PyObject *python_argument;
@@ -56,44 +64,70 @@ int main(){
         
         //argument conversion validation
         if (!python_argument) {
-            Py_DECREF(python_function_arguments);
-            Py_DECREF(python_module);
+            Py_DECREF(this->py_function_receive_args);
+            Py_DECREF(this->py_module_serial);
             fprintf(stderr, "Cannot convert argument\n");
-            return 1;
+            return false;
         }
         
         //add python argument to arguments list
-        PyTuple_SetItem(python_function_arguments, i, python_argument);
+        PyTuple_SetItem(this->py_function_receive_args, i, python_argument);
     }
     
     //frees python_argument on python interpreter
     Py_DECREF(python_argument);
+    
+    return true;
+}
 
+int Serial::receive_4_bytes(char *byte_array){
+    
     //call python function
-    PyObject *python_returning_value = PyObject_CallObject(python_function, python_function_arguments);
+    PyObject *py_returning_value = PyObject_CallObject(this->py_function_receive, this->py_function_receive_args);
     
     //frees python_function_arguments on python interpreter
-    Py_DECREF(python_function_arguments);
+    Py_DECREF(this->py_function_receive_args);
     
     //call validation
-    if (python_returning_value == NULL) {
-        Py_DECREF(python_function);
-        Py_DECREF(python_module);
+    if (py_returning_value == NULL) {
+        Py_DECREF(this->py_function_receive);
+        Py_DECREF(this->py_module_serial);
         PyErr_Print();
         fprintf(stderr,"Call failed\n");
         return 1;
     }
     
     //print python value
-    printf("Result of call: %s\n", PyString_AsString(python_returning_value));
+    printf("Result of call: %s\n", PyString_AsString(py_returning_value));
     
+    Py_DECREF(py_returning_value);
+    return 0;
+}
+
+bool Serial::unload_python_interpreter(){
+
     //frees python variables on python interpreter
-    Py_DECREF(python_returning_value);
-    Py_XDECREF(python_function);
-    Py_DECREF(python_module);
+    Py_XDECREF(this->py_function_receive);
+    Py_DECREF(this->py_module_serial);
 
     //finalize python interpreter
     Py_Finalize();
+    
+    return true;
+}
+
+int main(){
+    printf("running... \n\n\n");
+    
+    Serial serial = Serial();
+
+    if(not serial.load_python_interpreter()) return 1;
+    if(not serial.import_python_module()) return 1;
+    if(not serial.load_py_function_receive()) return 1;
+    char *hi;
+    serial.receive_4_bytes(hi);
+    
+    serial.unload_python_interpreter();
     
     printf("\n\ndone\n");
     return 0;
