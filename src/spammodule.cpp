@@ -3,9 +3,6 @@
 int main(){
     printf("running... \n\n\n");
     
-    PyObject *pName, *pModule, *pDict, *pFunc;
-    PyObject *pArgs, *pValue;
-
     //initialize python interpreter
     Py_Initialize();
     
@@ -18,69 +15,79 @@ int main(){
     strcat(newpath, add_to_path);
     PySys_SetPath(newpath); 
 
-    //import our module    
-    pName = PyString_FromString("serial_connection");
-    pModule = PyImport_Import(pName);
-    Py_DECREF(pName);
+    //convert C string to Python string
+    PyObject *python_string = PyString_FromString("serial_connection");
+    
+    //import module 
+    PyObject *python_module = PyImport_Import(python_string);
+    
+    //frees python_string on python interpreter
+    Py_DECREF(python_string);
 
     //module import validation
-    if(pModule == NULL){
+    if(python_module == NULL){
         PyErr_Print();
         fprintf(stderr, "Failed to load module...\n");
         return 1;
     }
 
-    //get reference to the python function (method)
-    pFunc = PyObject_GetAttrString(pModule, "add");
+    //get reference to the python function
+    PyObject *python_function = PyObject_GetAttrString(python_module, "add");
     
     //function reference validation
-    if(!pFunc || !PyCallable_Check(pFunc)){
+    if(!python_function || !PyCallable_Check(python_function)){
         if (PyErr_Occurred())
             PyErr_Print();
         fprintf(stderr, "Cannot find function 'add' in python module\n");
     }
     
     //set number of arguments of our function
-    pArgs = PyTuple_New(2);
+    PyObject *python_function_arguments = PyTuple_New(2);
     
     //c arguments will be converted to python arguments with this loop
+    PyObject *python_argument;
     for (int i=0; i<2; i++) {
     
         //argument conversion from C type to Python type
-        pValue = PyInt_FromLong(2);
+        python_argument = PyInt_FromLong(2);
         
         //argument conversion validation
-        if (!pValue) {
-            Py_DECREF(pArgs);
-            Py_DECREF(pModule);
+        if (!python_argument) {
+            Py_DECREF(python_function_arguments);
+            Py_DECREF(python_module);
             fprintf(stderr, "Cannot convert argument\n");
             return 1;
         }
         
         //add python argument to arguments list
-        PyTuple_SetItem(pArgs, i, pValue);
+        PyTuple_SetItem(python_function_arguments, i, python_argument);
     }
     
+    //frees python_argument on python interpreter
+    Py_DECREF(python_argument);
+
     //call python function
-    pValue = PyObject_CallObject(pFunc, pArgs);
+    PyObject *python_returning_value = PyObject_CallObject(python_function, python_function_arguments);
     
-    Py_DECREF(pArgs);
+    //frees python_function_arguments on python interpreter
+    Py_DECREF(python_function_arguments);
     
     //call validation
-    if (pValue == NULL) {
-        Py_DECREF(pFunc);
-        Py_DECREF(pModule);
+    if (python_returning_value == NULL) {
+        Py_DECREF(python_function);
+        Py_DECREF(python_module);
         PyErr_Print();
         fprintf(stderr,"Call failed\n");
         return 1;
     }
     
     //print python value
-    printf("Result of call: %ld\n", PyInt_AsLong(pValue));
+    printf("Result of call: %ld\n", PyInt_AsLong(python_returning_value));
     
-    Py_DECREF(pValue);
-    Py_XDECREF(pFunc);
-    Py_DECREF(pModule);
+    //frees python variables on python interpreter
+    Py_DECREF(python_returning_value);
+    Py_XDECREF(python_function);
+    Py_DECREF(python_module);
 
     //finalize python interpreter
     Py_Finalize();
